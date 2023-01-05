@@ -7,23 +7,69 @@ end="\033[0m\e[0m"
 red="\e[0;31m\033[1m"
 blue="\e[0;34m\033[1m"
 yellow="\e[0;33m\033[1m"
+purple="\e[0;35m\033[1m"
+
+function banner (){
+
+echo '
+	██       █████  ███████ ██    ██       ███    ██ ███████ ████████ ███    ███  █████  ██████  
+	██      ██   ██    ███   ██  ██        ████   ██ ██         ██    ████  ████ ██   ██ ██   ██ 
+	██      ███████   ███     ████   █████ ██ ██  ██ █████      ██    ██ ████ ██ ███████ ██████  
+	██      ██   ██  ███       ██          ██  ██ ██ ██         ██    ██  ██  ██ ██   ██ ██
+	███████ ██   ██ ███████    ██          ██   ████ ███████    ██    ██      ██ ██   ██ ██
+              (
+               )
+              (
+        /\\  .-"""-.  /\
+       //\\\/  ,,,  \//\\\\
+       |\/\| ,;;;;;, |/\\|
+       //\\\\\;-"""-;///\\\\
+      //  \/   .   \/  \\\\
+     (| ,-_| \ | / |_-, |)
+       //`__\.-.-./__`\\\
+      // /.-(() ())-.\ \\\
+     (\ |)    '---'   (|  /)
+      ` (|           |) `
+        \)           (/
+
+
+
+                                                                                        By Filiplain'
+
+}
+
+function delete_tmp (){
+
+	if [ -f udp.tmp ];then rm -f udp.tmp;fi
+	if [ -f tcp.tmp ];then rm -f tcp.tmp;fi
+	if [ -f snmpwalkv1.tmp ];then rm -f snmpwalkv1.tmp;fi
+	if [ -f snmpwalkv2c.tmp ];then rm -f snmpwalkv2c.tmp;fi
+	if [ -f where.tmp ];then rm -f where.tmp;fi
+
+}
+
+function made_in_do (){
+
+	echo -e "\n\n\n${red}Made${end} in ${blue}Do${end}"
+
+}
 
 trap ctrl_c INT
 
 function ctrl_c(){
-echo -e "\n\n\n${red}Made${end} in ${blue}Do${end}"
-if [ -f udp.tmp ];then rm -f udp.tmp;fi
-if [ -f tcp.tmp ];then rm -f tcp.tmp;fi
-if [ -f snmpwalkv1.tmp ];then rm -f snmpwalkv1.tmp;fi
-if [ -f snmpwalkv2c.tmp ];then rm -f snmpwalkv2c.tmp;fi
-if [ -f where.tmp ];then rm -f where.tmp;fi
-exit 0
+
+	made_in_do
+	delete_tmp
+	exit 0
+
 }
+
+echo -e "${purple} $(banner) ${end}"
 
 if [ "$1" ]
 then
 echo -e "${blue}\nScanning TCP ports${end} \n"
-allTCPports=$(nmap -Pn -n --max-retries=0 --min-rate 5000 --open -p- $1|grep 'tcp' |cut -d '/' -f 1 > tcp.tmp;cat tcp.tmp|grep -v 'Not shown'|tr '\n' ',')
+allTCPports=$(nmap -Pn -n --max-retries=0 --min-rate 2000 --open -p- $1|grep -v "Not shown"| grep 'tcp' |cut -d '/' -f 1 > tcp.tmp;cat tcp.tmp|tr '\n' ',')
   
   if [ -s ./tcp.tmp ]
     then
@@ -38,7 +84,7 @@ allTCPports=$(nmap -Pn -n --max-retries=0 --min-rate 5000 --open -p- $1|grep 'tc
   if [ $(id -u) == "0" ]
   then
        echo -e "\n ${blue}Scanning UDP ports ${end}\n"
-       udpports=$(nmap -Pn -sU -n --max-retries=0 --min-rate 5000 --open $1|grep 'udp' |cut -d '/' -f 1 > udp.tmp;cat udp.tmp|grep -v 'Not shown'|tr '\n' ',')
+       udpports=$(nmap -Pn -sU -n --max-retries=0 --min-rate 2000 --open -p- $1|grep -v 'Not shown'| grep 'udp' |cut -d '/' -f 1 > udp.tmp;cat udp.tmp|tr '\n' ',')
        if [ -s ./udp.tmp ]
          then    
          echo -e "\n${blue}Open UDP ports:${end}${yellow} \n $(echo $udpports| tr ',' '\n')${end}\n\n"
@@ -76,8 +122,6 @@ else
    echo -e "${red}\n Usage: $0 <IP address>${end}"
 
 fi
-if [ -f udp.tmp ];then rm -f udp.tmp;fi
-if [ -f tcp.tmp ];then rm -f tcp.tmp;fi
-if [ -f snmpwalkv1.tmp ];then rm -f snmpwalkv1.tmp;fi
-if [ -f snmpwalkv2c.tmp ];then rm -f snmpwalkv2c.tmp;fi
-echo -e "\n\n\n${red}Made${end} in ${blue}Do${end}"
+
+delete_tmp
+made_in_do
